@@ -1,0 +1,11 @@
+If you define your shapes around the origin then if it takes you closer to the origin, then your normal is in the wrong direction. 
+
+length of a offset by origin is less than the origin then you know that the normal is in the wrong direction. This is for flat shaded shapes, where every vertex has the same normal.
+
+flat shading = you can't share vertexes! one normal per triangle thats assigned to all vertices..
+	can't share vertices or they'll fight over setting point normals.
+
+tetrahedron needs 4 vertices  000  100  001  010
+	4 normals: -1-1-1  100  001  010  (rough estimated normals)
+		but need to normalize the -1! divide by magnitude = sqrt(3*(-1)^2)  = sqrt 3
+		last normal is sqrt(3) / 3

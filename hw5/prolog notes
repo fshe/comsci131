@@ -1,0 +1,68 @@
+prolog notes
+
+| ? - prereq(X, cs111) = prereq(X, cs131); //X is a prereq for both 
+
+//later not that Y and Z dont have to be different, until you specifiy Y\=Z.
+//prereq of prereq
+| ? - prereq(X, prereq(Z,Y)). //doesnt work because prereq returns true or false.
+
+/*X is a prereq of a prereq of Y */
+prereq2(X,Y) :- prereq(X,Z), prereq(Z,Y). //defines a new relation
+prereq2(X,Y) :- prereq(X,Y). // basically unions the results of these two calls
+//why was 31 twice? Finds all derivations of the fact
+
+/* X is required before you can take Y */
+prereqTransitive(X,Y) :- prereq(X,Y).  //base case. this needs to be first because prolog will search for these rules. 
+prereqTransitive(X,Y) :- 
+	prereq(X,Z), prereqTransitive(Z,Y).  // if these were switched then it would be an infinite search space...
+
+/*So far we've seen two kinds of terms:
+ - atoms (lowercase identifiers)
+ - variables (uppercase identifiers)
+
+ - uninterpreted function:
+ 	atom(term1, term2, ..., termN)
+
+ 	recall Like this in mocaml: Node(Leaf, 1, Leaf)
+
+ 	node(leaf, 1, leaf) //this means terms can be built as a data structure
+ */
+
+ | ? - .(1, .(2, .(3, [])))  = [1,2,3].   //shorthand notation for the cons operator . 
+//append
+ //app(L1, L2, L3) :- L1=[], L3=L2.
+ //equivalent to the following
+ app([], L2, L2).   //defining relations..empty list apended to L2 is L2
+ app(.(H,T), L2, .(H,L)) :- app(T, L2, L).
+
+ //contains(X, .(H,T)) :- X=H.
+contains(X, .(X,T)).
+contains(X, .(H,T)) :- contains(X,T).
+
+//reverse
+/*
+	let rec reverse l = 
+		match l with
+			[] -> []
+			| h::t -> (reverse t)@]h]
+*/
+
+rev([],[]).
+rev(.(H,T), L) :- rev(T, L0), app(L0, [H], L).
+
+///wolf problem
+opposite(west, east).
+opposite(east,west).
+
+move([P,W,G,C], person, [Q,W,G,C]) :- opposite(P,Q).
+move([P,W,G,C], wolf, [Q,Q,G,C]) :- P=W, opposite(G,C), opposite(P,Q).
+move([P,W,G,C], goat, [Q,W,Q,C]) :- P=G, opposite(P,Q).
+move([P,W,G,C], cabbage, [Q,W,G,Q]) :- P=C, opposite(W,G), opposite(P,Q). //checks that the person and the cabbage are on the same side
+
+//now we just need a generator of moves 
+puzzle(End, End, []). 
+puzzle(Start, End, .(Move, Moves)) :-
+	move(Start, Move, S), puzzle(S,End,Moves).
+
+//this query could go on forever, so you need to bound the query.
+| ? - puzzle([west, west, west, west], [east,east,east,east], L).
